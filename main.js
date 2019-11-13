@@ -56,12 +56,29 @@ async function newPlainShaderMaterial(color) {
     });
 }
 
+// Lambertマテリアルを返す
+async function newLambertMaterial(albedo, lightDirection, lightIntensity) {
+    const vertexShader = await downloadText("/shaders/basic.vert");
+    const fragmentShader = await downloadText("/shaders/lambert.frag");
+
+    return new THREE.ShaderMaterial({
+        uniforms: {
+            albedo: { value: albedo },
+            lightDirection: { value: lightDirection },
+            lightIntensity: { value: lightIntensity },
+        },
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+    });
+}
+
 async function main() {
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0xe0ddcc, 1);
     document.body.appendChild(renderer.domElement);
 
     var ambientLight = new THREE.AmbientLight(0x404040, 1.25);
@@ -73,7 +90,11 @@ async function main() {
     const mesh = await loadDuck()
 
     // シェーダを変えてみる
-    mesh.material = await newPlainShaderMaterial(new THREE.Vector3(0.988, 0.729, 0.012));
+    mesh.material = await newLambertMaterial(
+        new THREE.Vector3(0.988, 0.729, 0.012), // albedo
+        new THREE.Vector3(0.0, 1.0, 0.0), // lightDirection
+        new THREE.Vector3(1.0, 1.0, 1.0) // lightIntensity
+    );
 
     scene.add(mesh);
 
