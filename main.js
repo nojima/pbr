@@ -19,6 +19,20 @@ async function downloadText(url) {
     return await resp.text();
 }
 
+// 単色塗りのマテリアルを返す
+async function newPlainShaderMaterial(color) {
+    const vertexShader = await downloadText("/shaders/basic.vert");
+    const fragmentShader = await downloadText("/shaders/plain.frag");
+
+    return new THREE.ShaderMaterial({
+        uniforms: {
+            uColor: { value: color },
+        },
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+    });
+}
+
 async function main() {
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -48,17 +62,7 @@ async function main() {
     console.log(mesh);
 
     // シェーダを変えてみる
-    var vertexShader = await downloadText("/shaders/basic.vert");
-    var fragmentShader = await downloadText("/shaders/plain.frag");
-
-    var material = new THREE.ShaderMaterial({
-        uniforms: {
-            uColor: { value: new THREE.Vector3(0.988, 0.729, 0.012), },
-        },
-        vertexShader: vertexShader,
-        fragmentShader: fragmentShader,
-    });
-    mesh.material = material;
+    mesh.material = await newPlainShaderMaterial(new THREE.Vector3(0.988, 0.729, 0.012));
 
     scene.add(mesh);
 
