@@ -86,12 +86,12 @@ async function newPhongMaterial(
 
     return new THREE.ShaderMaterial({
         uniforms: {
-            albedo: { value: albedo },
-            lightDirection: { value: lightDirection },
-            lightIntensity: { value: lightIntensity },
-            ambientIntensity: { value: ambientIntensity },
-            shininess: { value: shininess },
-            reflectance: { value: reflectance },
+            uAlbedo: { value: albedo },
+            uLightDirection: { value: lightDirection },
+            uLightIntensity: { value: lightIntensity },
+            uAmbientIntensity: { value: ambientIntensity },
+            uShininess: { value: shininess },
+            uReflectance: { value: reflectance },
         },
         vertexShader: vertexShader,
         fragmentShader: fragmentShader,
