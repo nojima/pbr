@@ -72,6 +72,32 @@ async function newLambertMaterial(albedo, lightDirection, lightIntensity) {
     });
 }
 
+// Phongマテリアルを返す
+async function newPhongMaterial(
+    albedo,
+    lightDirection,
+    lightIntensity,
+    ambientIntensity,
+    shininess,
+    reflectance,
+) {
+    const vertexShader = await downloadText("/shaders/basic.vert");
+    const fragmentShader = await downloadText("/shaders/phong.frag");
+
+    return new THREE.ShaderMaterial({
+        uniforms: {
+            albedo: { value: albedo },
+            lightDirection: { value: lightDirection },
+            lightIntensity: { value: lightIntensity },
+            ambientIntensity: { value: ambientIntensity },
+            shininess: { value: shininess },
+            reflectance: { value: reflectance },
+        },
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+    });
+}
+
 async function main() {
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -90,10 +116,13 @@ async function main() {
     const mesh = await loadDuck()
 
     // シェーダを変えてみる
-    mesh.material = await newLambertMaterial(
+    mesh.material = await newPhongMaterial(
         new THREE.Vector3(0.988, 0.729, 0.012), // albedo
         new THREE.Vector3(0.0, 1.0, 0.0), // lightDirection
-        new THREE.Vector3(1.0, 1.0, 1.0) // lightIntensity
+        new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(2.0), // lightIntensity
+        new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.5), // ambientIntensity
+        40.0, // shiness
+        0.2, // reflectance
     );
 
     scene.add(mesh);
