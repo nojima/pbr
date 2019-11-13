@@ -3,11 +3,34 @@
 async function loadGLTF(path) {
     var loader = new THREE.GLTFLoader();
     return new Promise(resolve => {
-        loader.load(path, resolve)
+        loader.load(path, resolve);
     }, error => {
         console.error(error);
         throw new Error(`Failed to load GLTF: path=${path}`)
     });
+}
+
+// アヒルのメッシュを返す
+async function loadDuck() {
+    const gltf = await loadGLTF("/vendor/gltf-sample-models/2.0/Duck/glTF-Binary/Duck.glb");
+
+    // mesh を取り出す
+    var mesh = null;
+    for (const obj of gltf.scene.children) {
+        for (const child of obj.children) {
+            if (child.type === "Mesh") {
+                mesh = child;
+                break;
+            }
+        }
+    }
+
+    if (!mesh) {
+        console.log(gltf);
+        throw new Error(`Failed to find mesh`);
+    }
+
+    return mesh;
 }
 
 async function downloadText(url) {
@@ -47,19 +70,7 @@ async function main() {
     var directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
     scene.add(directionalLight);
 
-    var gltf = await loadGLTF("/vendor/gltf-sample-models/2.0/Duck/glTF-Binary/Duck.glb")
-
-    // mesh を取り出す
-    var mesh = null
-    for (const obj of gltf.scene.children) {
-        for (const child of obj.children) {
-            if (child.type === "Mesh") {
-                mesh = child
-                break
-            }
-        }
-    }
-    console.log(mesh);
+    const mesh = await loadDuck()
 
     // シェーダを変えてみる
     mesh.material = await newPlainShaderMaterial(new THREE.Vector3(0.988, 0.729, 0.012));
