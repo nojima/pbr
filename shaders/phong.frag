@@ -1,5 +1,7 @@
 // Phong の反射モデル
 
+const float PI = acos(-1.0);
+
 uniform vec3 uAlbedo;
 uniform vec3 uLightDirection;
 uniform vec3 uLightIntensity;
@@ -17,7 +19,9 @@ vec3 DiffuseIntensity(
     vec3 albedo,
     float reflectance
 ) {
-    return (1.0 - reflectance) * dot(lightDirection, normal) * albedo * lightIntensity;
+    // 正規化Lambertモデル
+    float d = max(dot(lightDirection, normal), 0.0);
+    return (1.0 - reflectance) * d * albedo * lightIntensity / PI;
 }
 
 vec3 SpecularIntensity(
