@@ -6,7 +6,17 @@ async function loadGLTF(path) {
         loader.load(path, resolve)
     }, error => {
         console.error(error);
+        throw new Error(`Failed to load GLTF: path=${path}`)
     });
+}
+
+async function downloadText(url) {
+    const resp = await fetch(url);
+    if (!resp.ok) {
+        console.log(resp);
+        throw new Error(`Failed to download text: url=${url}, status=${resp.status}`);
+    }
+    return await resp.text();
 }
 
 async function main() {
@@ -38,7 +48,14 @@ async function main() {
     console.log(mesh);
 
     // シェーダを変えてみる
-    mesh.material = new THREE.MeshPhongMaterial({ color: 0xf5ba3b });
+    var vertexShader = await downloadText("/shaders/basic.vert");
+    var fragmentShader = await downloadText("/shaders/plain.frag");
+
+    var material = new THREE.ShaderMaterial({
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+    });
+    mesh.material = material;
 
     scene.add(mesh);
 
