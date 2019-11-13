@@ -1,8 +1,17 @@
 "use strict";
 
-function main() {
+async function loadGLTF(path) {
+    var loader = new THREE.GLTFLoader();
+    return new Promise(resolve => {
+        loader.load(path, resolve)
+    }, error => {
+        console.error(error);
+    });
+}
+
+async function main() {
     var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
 
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -14,19 +23,34 @@ function main() {
     var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
     scene.add(directionalLight);
 
-    var geometry = new THREE.BoxGeometry(1, 1, 1);
-    var material = new THREE.MeshPhongMaterial({ color: 0xaaaaff });
-    var cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
+    var gltf = await loadGLTF("/vendor/gltf-sample-models/2.0/Duck/glTF-Binary/Duck.glb")
 
-    camera.position.z = 2;
+    // mesh を取り出す
+    var mesh = null
+    for (const obj of gltf.scene.children) {
+        for (const child of obj.children) {
+            if (child.type === "Mesh") {
+                mesh = child
+                break
+            }
+        }
+    }
+    console.log(mesh);
+
+    // シェーダを変えてみる
+    mesh.material = new THREE.MeshPhongMaterial({ color: 0xf5ba3b });
+
+    scene.add(mesh);
+
+    camera.position.z = 500;
+    camera.position.x = 0;
 
     function animate() {
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
 
-        cube.rotation.x += 0.01;
-        cube.rotation.y += 0.01;
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y -= 0.01;
     }
     animate();
 }
