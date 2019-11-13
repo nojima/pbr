@@ -52,6 +52,9 @@ async function main() {
     var fragmentShader = await downloadText("/shaders/plain.frag");
 
     var material = new THREE.ShaderMaterial({
+        uniforms: {
+            uColor: { value: new THREE.Vector3(0.988, 0.729, 0.012), },
+        },
         vertexShader: vertexShader,
         fragmentShader: fragmentShader,
     });
