@@ -17,10 +17,10 @@ async function main() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    var ambientLight = new THREE.AmbientLight(0x404040);
+    var ambientLight = new THREE.AmbientLight(0x404040, 1.25);
     scene.add(ambientLight);
 
-    var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    var directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
     scene.add(directionalLight);
 
     var gltf = await loadGLTF("/vendor/gltf-sample-models/2.0/Duck/glTF-Binary/Duck.glb")
@@ -42,7 +42,7 @@ async function main() {
 
     scene.add(mesh);
 
-    camera.position.z = 500;
+    camera.position.z = 400;
     camera.position.x = 0;
 
     function animate() {
