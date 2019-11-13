@@ -98,6 +98,34 @@ async function newPhongMaterial(
     });
 }
 
+// Physicalマテリアルを返す
+async function newPhysicalMaterial(
+    albedo,
+    roughness,
+    lightDirection,
+    lightIntensity,
+    ambientIntensity,
+    shininess,
+    reflectance,
+) {
+    const vertexShader = await downloadText("/shaders/basic.vert");
+    const fragmentShader = await downloadText("/shaders/physical.frag");
+
+    return new THREE.ShaderMaterial({
+        uniforms: {
+            uAlbedo: { value: albedo },
+            uRoughness: { value: roughness },
+            uLightDirection: { value: lightDirection },
+            uLightIntensity: { value: lightIntensity },
+            uAmbientIntensity: { value: ambientIntensity },
+            uShininess: { value: shininess },
+            uReflectance: { value: reflectance },
+        },
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+    });
+}
+
 async function main() {
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
@@ -116,21 +144,33 @@ async function main() {
     const mesh = await loadDuck()
 
     // シェーダを変えてみる
-    /*
-    mesh.material = await newLambertMaterial(
-        new THREE.Vector3(0.988, 0.729, 0.012), // albedo
-        new THREE.Vector3(0.0, 1.0, 0.0), // lightDirection
-        new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0), // lightIntensity
-    );
-    */
-    mesh.material = await newPhongMaterial(
-        new THREE.Vector3(0.988, 0.729, 0.012), // albedo
-        new THREE.Vector3(0.0, 1.0, 0.0), // lightDirection
-        new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(2.0), // lightIntensity
-        new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.5), // ambientIntensity
-        40.0, // shiness
-        0.2, // reflectance
-    );
+    const shaderType = 2;
+    if (shaderType == 0) {
+        mesh.material = await newLambertMaterial(
+            new THREE.Vector3(0.988, 0.729, 0.012), // albedo
+            new THREE.Vector3(-0.2, 1.0, 0.5), // lightDirection
+            new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0), // lightIntensity
+        );
+    } else if (shaderType == 1) {
+        mesh.material = await newPhongMaterial(
+            new THREE.Vector3(0.988, 0.729, 0.012), // albedo
+            new THREE.Vector3(-0.2, 1.0, 0.5), // lightDirection
+            new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(2.0), // lightIntensity
+            new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.3), // ambientIntensity
+            40.0, // shiness
+            0.2, // reflectance
+        );
+    } else if (shaderType == 2) {
+        mesh.material = await newPhysicalMaterial(
+            new THREE.Vector3(0.988, 0.729, 0.012), // albedo
+            0.3, // roughness
+            new THREE.Vector3(-0.2, 1.0, 0.5), // lightDirection
+            new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0), // lightIntensity
+            new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.0), // ambientIntensity
+            40.0, // shiness
+            0.0, // reflectance
+        );
+    }
 
     scene.add(mesh);
 
@@ -141,8 +181,8 @@ async function main() {
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
 
-        mesh.rotation.x += 0.01;
-        mesh.rotation.y -= 0.01;
+        //mesh.rotation.x += 0.01;
+        //mesh.rotation.y -= 0.01;
     }
     animate();
 }
