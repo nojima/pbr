@@ -116,6 +116,13 @@ async function main() {
     const mesh = await loadDuck()
 
     // シェーダを変えてみる
+    /*
+    mesh.material = await newLambertMaterial(
+        new THREE.Vector3(0.988, 0.729, 0.012), // albedo
+        new THREE.Vector3(0.0, 1.0, 0.0), // lightDirection
+        new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0), // lightIntensity
+    );
+    */
     mesh.material = await newPhongMaterial(
         new THREE.Vector3(0.988, 0.729, 0.012), // albedo
         new THREE.Vector3(0.0, 1.0, 0.0), // lightDirection
