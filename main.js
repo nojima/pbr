@@ -144,9 +144,13 @@ async function main() {
     var renderer = new THREE.WebGLRenderer();
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0xe0ddcc, 1);
+    renderer.gammaInput = true;
+    renderer.gammaOutput = true;
+    renderer.gammaFactor = 2.2;
     document.body.appendChild(renderer.domElement);
 
     const albedoMap = await downloadTexture("/vendor/gltf-sample-models/2.0/Duck/glTF/DuckCM.png");
+    albedoMap.encoding = THREE.sRGBEncoding;
     albedoMap.flipY = false;
     console.log(albedoMap);
 
@@ -171,7 +175,7 @@ async function main() {
         );
     } else if (shaderType == 2) {
         mesh.material = await newPhysicalMaterial(
-            new THREE.Vector3(0.988, 0.729, 0.012), // albedo
+            new THREE.Vector3(1.0, 1.0, 1.0), // albedo
             albedoMap,
             0.3, // diffuseRoughness
             new THREE.Vector3(-0.2, 1.0, 0.5), // lightDirection
