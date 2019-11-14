@@ -135,12 +135,6 @@ async function main() {
     renderer.setClearColor(0xe0ddcc, 1);
     document.body.appendChild(renderer.domElement);
 
-    var ambientLight = new THREE.AmbientLight(0x404040, 1.25);
-    scene.add(ambientLight);
-
-    var directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
-    scene.add(directionalLight);
-
     const mesh = await loadDuck()
 
     // シェーダを変えてみる
