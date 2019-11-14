@@ -101,12 +101,12 @@ async function newPhongMaterial(
 // Physicalマテリアルを返す
 async function newPhysicalMaterial(
     albedo,
-    roughness,
+    diffuseRoughness,
     lightDirection,
     lightIntensity,
     ambientIntensity,
-    shininess,
-    reflectance,
+    specularRoughness,
+    specularColor
 ) {
     const vertexShader = await downloadText("/shaders/basic.vert");
     const fragmentShader = await downloadText("/shaders/physical.frag");
@@ -114,12 +114,12 @@ async function newPhysicalMaterial(
     return new THREE.ShaderMaterial({
         uniforms: {
             uAlbedo: { value: albedo },
-            uRoughness: { value: roughness },
+            uDiffuseRoughness: { value: diffuseRoughness },
             uLightDirection: { value: lightDirection },
             uLightIntensity: { value: lightIntensity },
             uAmbientIntensity: { value: ambientIntensity },
-            uShininess: { value: shininess },
-            uReflectance: { value: reflectance },
+            uSpecularRoughness: { value: specularRoughness },
+            uSpecularColor: { value: specularColor },
         },
         vertexShader: vertexShader,
         fragmentShader: fragmentShader,
@@ -163,12 +163,12 @@ async function main() {
     } else if (shaderType == 2) {
         mesh.material = await newPhysicalMaterial(
             new THREE.Vector3(0.988, 0.729, 0.012), // albedo
-            0.3, // roughness
+            0.3, // diffuseRoughness
             new THREE.Vector3(-0.2, 1.0, 0.5), // lightDirection
             new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0), // lightIntensity
             new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.0), // ambientIntensity
-            40.0, // shiness
-            0.0, // reflectance
+            0.5, // specularRoughness
+            new THREE.Vector3(0.2, 0.2, 0.2), // specularColor
         );
     }
 
@@ -181,8 +181,8 @@ async function main() {
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
 
-        //mesh.rotation.x += 0.01;
-        //mesh.rotation.y -= 0.01;
+        mesh.rotation.x += 0.01;
+        mesh.rotation.y -= 0.01;
     }
     animate();
 }
