@@ -30,7 +30,7 @@ vec3 DiffuseBRDF(
     float NV = dot(normal, viewDirection);
     float s = LV - NL * NV;
     float t = (s <= 0.0) ? 1.0 : max(NL, NV);
-    return albedo * max(NL, 0.0) * (A + B * s / t);
+    return albedo * (A + B * s / t);
 }
 
 float SpecularBRDF(
@@ -47,11 +47,12 @@ float SpecularBRDF(
 void main(void) {
     vec3 normal = normalize(vNormal);
     vec3 viewDirection = normalize(cameraPosition - vPosition);
+    vec3 lightIrradiance = max(dot(normal, uLightDirection), 0.0) * uLightIntensity;
 
     //vec3 intensity = uAmbientIntensity;
     //intensity += (1.0 - uReflectance) * uLightIntensity * DiffuseBRDF(viewDirection, uLightDirection, normal, uAlbedo, uRoughness);
     //intensity += uReflectance * uLightIntensity * SpecularBRDF(viewDirection, uLightDirection, normal, uShininess);
-    vec3 intensity = uLightIntensity * DiffuseBRDF(viewDirection, uLightDirection, normal, uAlbedo, uRoughness);
+    vec3 intensity = DiffuseBRDF(viewDirection, uLightDirection, normal, uAlbedo, uRoughness) * lightIrradiance;
 
     gl_FragColor = vec4(intensity, 1.0);
 }
