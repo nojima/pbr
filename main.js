@@ -166,7 +166,7 @@ async function main() {
             0.3, // diffuseRoughness
             new THREE.Vector3(-0.2, 1.0, 0.5), // lightDirection
             new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0), // lightIntensity
-            new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.0), // ambientIntensity
+            new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.3), // ambientIntensity
             0.5, // specularRoughness
             new THREE.Vector3(0.2, 0.2, 0.2), // specularColor
         );

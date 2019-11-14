@@ -128,6 +128,6 @@ void main(void) {
     // specular
     fr += SpecularBRDF(viewDirection, uLightDirection, normal, uSpecularRoughness, uSpecularColor);
 
-    vec3 intensity = fr * lightIrradiance;
+    vec3 intensity = fr * lightIrradiance + uAmbientIntensity;
     gl_FragColor = vec4(intensity, 1.0);
 }
