@@ -56,6 +56,15 @@ async function newPlainShaderMaterial(color) {
     });
 }
 
+async function downloadTexture(url) {
+    return new Promise(resolve => {
+        new THREE.TextureLoader().load(url, resolve)
+    }, error => {
+        console.error(error);
+        throw new Error(`Failed to load texture: url=${url}`)
+    });
+}
+
 // Lambertマテリアルを返す
 async function newLambertMaterial(albedo, lightDirection, lightIntensity) {
     const vertexShader = await downloadText("/shaders/basic.vert");
@@ -101,6 +110,7 @@ async function newPhongMaterial(
 // Physicalマテリアルを返す
 async function newPhysicalMaterial(
     albedo,
+    albedoMap,
     diffuseRoughness,
     lightDirection,
     lightIntensity,
@@ -114,6 +124,7 @@ async function newPhysicalMaterial(
     return new THREE.ShaderMaterial({
         uniforms: {
             uAlbedo: { value: albedo },
+            uAlbedoMap: { value: albedoMap },
             uDiffuseRoughness: { value: diffuseRoughness },
             uLightDirection: { value: lightDirection },
             uLightIntensity: { value: lightIntensity },
@@ -134,6 +145,10 @@ async function main() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0xe0ddcc, 1);
     document.body.appendChild(renderer.domElement);
+
+    const albedoMap = await downloadTexture("/vendor/gltf-sample-models/2.0/Duck/glTF/DuckCM.png");
+    albedoMap.flipY = false;
+    console.log(albedoMap);
 
     const mesh = await loadDuck()
 
@@ -157,6 +172,7 @@ async function main() {
     } else if (shaderType == 2) {
         mesh.material = await newPhysicalMaterial(
             new THREE.Vector3(0.988, 0.729, 0.012), // albedo
+            albedoMap,
             0.3, // diffuseRoughness
             new THREE.Vector3(-0.2, 1.0, 0.5), // lightDirection
             new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0), // lightIntensity

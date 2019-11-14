@@ -8,6 +8,7 @@ const float PI = acos(-1.0);
 const int DIFFUSE_BRDF = 2;
 
 uniform vec3 uAlbedo;
+uniform sampler2D uAlbedoMap;
 uniform float uDiffuseRoughness;
 uniform vec3 uLightDirection;
 uniform vec3 uLightIntensity;
@@ -17,6 +18,7 @@ uniform vec3 uSpecularColor;
 
 varying vec3 vPosition;
 varying vec3 vNormal;
+varying vec2 vUV;
 
 // 正規化 Lambert BRDF
 vec3 LambertDiffuseBRDF(vec3 albedo) {
@@ -64,14 +66,17 @@ vec3 DiffuseBRDF(
     vec3 lightDirection,
     vec3 normal,
     vec3 albedo,
+    vec2 uv,
     float roughness
 ) {
+    vec3 albedo_ = albedo * texture2D(uAlbedoMap, uv).rgb;
+
     if (DIFFUSE_BRDF == 0) {
-        return LambertDiffuseBRDF(albedo);
+        return LambertDiffuseBRDF(albedo_);
     } else if (DIFFUSE_BRDF == 1) {
-        return OrenNayarDiffuseBRDF(viewDirection, lightDirection, normal, albedo, roughness);
+        return OrenNayarDiffuseBRDF(viewDirection, lightDirection, normal, albedo_, roughness);
     } else if (DIFFUSE_BRDF == 2) {
-        return DisneyDiffuseBRDF(viewDirection, lightDirection, normal, albedo, roughness);
+        return DisneyDiffuseBRDF(viewDirection, lightDirection, normal, albedo_, roughness);
     } else {
         return vec3(0.0, 0.0, 0.0);
     }
@@ -123,7 +128,7 @@ void main(void) {
     vec3 fr = vec3(0.0, 0.0, 0.0);
 
     // diffuse
-    fr += DiffuseBRDF(viewDirection, uLightDirection, normal, uAlbedo, uDiffuseRoughness);
+    fr += DiffuseBRDF(viewDirection, uLightDirection, normal, uAlbedo, vUV, uDiffuseRoughness);
 
     // specular
     fr += SpecularBRDF(viewDirection, uLightDirection, normal, uSpecularRoughness, uSpecularColor);
