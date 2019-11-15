@@ -169,6 +169,10 @@ async function main() {
     renderer.gammaFactor = 2.2;
     document.body.appendChild(renderer.domElement);
 
+    // VR
+    document.body.appendChild(THREE.WEBVR.createButton(renderer));
+    renderer.vr.enabled = true;
+
     const albedoMap = await downloadTexture("/vendor/gltf-sample-models/2.0/Duck/glTF/DuckCM.png");
     albedoMap.encoding = THREE.sRGBEncoding;
     albedoMap.flipY = false;
@@ -257,20 +261,17 @@ async function main() {
 
     scene.add(mesh);
 
-    camera.position.z = 400;
-    camera.position.x = 0;
-
+    mesh.position.z = -400;
     mesh.rotation.x += 0.5;
     mesh.rotation.z += 0.1;
 
-    function animate() {
-        requestAnimationFrame(animate);
+    function render() {
         renderer.render(scene, camera);
 
         //mesh.rotation.x += 0.01;
         //mesh.rotation.y -= 0.01;
     }
-    animate();
+    renderer.setAnimationLoop(render);
 }
 
 main();
