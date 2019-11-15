@@ -201,11 +201,13 @@ async function main() {
             0.2, // reflectance
         );
     } else if (shaderType == 2) {
+        // 光源
         const light = {
             lightDirection: new THREE.Vector3(-0.2, 1.0, 0.5),
             lightIntensity: new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0),
             ambientIntensity: new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.4),
         };
+        // つるっとした金
         const smoothGold = {
             albedo: new THREE.Vector3(0.0, 0.0, 0.0),
             albedoMap: null,
@@ -215,6 +217,7 @@ async function main() {
             normalMap: null,
             normalMapRepeat: 10,
         };
+        // ザラザラした金
         const roughGold = {
             albedo: new THREE.Vector3(0.0, 0.0, 0.0),
             albedoMap: null,
@@ -224,6 +227,7 @@ async function main() {
             normalMap: null,
             normalMapRepeat: 10,
         };
+        // 凸凹した鉄
         const bumpyIron = {
             albedo: new THREE.Vector3(0.0, 0.0, 0.0),
             albedoMap: null,
@@ -233,6 +237,7 @@ async function main() {
             normalMap: normalMap,
             normalMapRepeat: 10,
         };
+        // プラスチック
         const plastic = {
             albedo: new THREE.Vector3(1.0, 1.0, 1.0),
             albedoMap: albedoMap,
@@ -242,6 +247,7 @@ async function main() {
             normalMap: null,
             normalMapRepeat: 10,
         };
+        // ザラザラしたプラスチック
         const roughPlastic = {
             albedo: new THREE.Vector3(1.0, 1.0, 1.0),
             albedoMap: albedoMap,
@@ -253,7 +259,7 @@ async function main() {
         };
 
         const parameters = {
-            ...roughPlastic,
+            ...roughGold, // 素材を選択
             ...light,
         };
         mesh.material = await newPhysicalMaterial(parameters);
