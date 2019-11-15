@@ -17,6 +17,10 @@ uniform vec3 uLightIntensity;
 uniform vec3 uAmbientIntensity;
 uniform float uSpecularRoughness;
 uniform vec3 uSpecularColor;
+#ifdef NORMAL_MAP_ENABLED
+    uniform sampler2D uNormalMap;
+    uniform float uNormalMapRepeat;
+#endif
 
 varying vec3 vPosition;
 varying vec3 vNormal;
@@ -126,8 +130,25 @@ vec3 SpecularBRDF(
          * Fresnel(halfVector, lightDirection, specularColor);
 }
 
+// r を n の周りに theta だけ回転させたベクトルを返す
+vec3 RotateVector(vec3 r, vec3 n, float theta) {
+    // ロドリゲスの回転公式
+    return r * cos(theta) + n * dot(r, n) * (1.0 - cos(theta)) + cross(n, r) * sin(theta);
+}
+
+vec3 CalculateNormal() {
+    #ifdef NORMAL_MAP_ENABLED
+        vec3 m = 2.0 * texture2D(uNormalMap, fract(vUV * uNormalMapRepeat)).rgb - 1.0;
+        vec3 axis = normalize(vec3(m.y, -m.x, 0));
+        float angle = acos(m.z);
+        return normalize(RotateVector(vNormal, axis, angle));
+    #else
+        return normalize(vNormal);
+    #endif
+}
+
 void main(void) {
-    vec3 normal = normalize(vNormal);
+    vec3 normal = CalculateNormal();
     vec3 viewDirection = normalize(cameraPosition - vPosition);
     vec3 lightIrradiance = max(dot(normal, uLightDirection), 0.0) * uLightIntensity;
 

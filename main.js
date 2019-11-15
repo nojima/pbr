@@ -116,7 +116,9 @@ async function newPhysicalMaterial(
     lightIntensity,
     ambientIntensity,
     specularRoughness,
-    specularColor
+    specularColor,
+    normalMap,
+    normalMapRepeat
 ) {
     var vertexShader = await downloadText("/shaders/basic.vert");
     var fragmentShader = await downloadText("/shaders/physical.frag");
@@ -135,6 +137,13 @@ async function newPhysicalMaterial(
         uniforms.uAlbedoMap = { value: albedoMap };
         vertexShader = "#define ALBEDO_MAP_ENABLED 1\n" + vertexShader
         fragmentShader = "#define ALBEDO_MAP_ENABLED 1\n" + fragmentShader
+    }
+
+    if (normalMap) {
+        uniforms.uNormalMap = { value: normalMap };
+        uniforms.uNormalMapRepeat = { value: normalMapRepeat };
+        vertexShader = "#define NORMAL_MAP_ENABLED 1\n" + vertexShader
+        fragmentShader = "#define NORMAL_MAP_ENABLED 1\n" + fragmentShader
     }
 
     return new THREE.ShaderMaterial({
@@ -159,7 +168,10 @@ async function main() {
     const albedoMap = await downloadTexture("/vendor/gltf-sample-models/2.0/Duck/glTF/DuckCM.png");
     albedoMap.encoding = THREE.sRGBEncoding;
     albedoMap.flipY = false;
-    console.log(albedoMap);
+
+    const normalMap = await downloadTexture("/vendor/sample_normal_map.jpg")
+    normalMap.encoding = THREE.sRGBEncoding;
+    normalMap.flipY = false;
 
     const mesh = await loadDuck()
 
@@ -190,6 +202,8 @@ async function main() {
             new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.3), // ambientIntensity
             0.5, // specularRoughness
             new THREE.Vector3(0.2, 0.2, 0.2), // specularColor
+            normalMap,
+            10, // normalMapRepeat
         );
     }
 
