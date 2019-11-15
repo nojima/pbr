@@ -108,40 +108,44 @@ async function newPhongMaterial(
 }
 
 // Physicalマテリアルを返す
-async function newPhysicalMaterial(
-    albedo,
-    albedoMap,
-    diffuseRoughness,
-    lightDirection,
-    lightIntensity,
-    ambientIntensity,
-    specularRoughness,
-    specularColor,
-    normalMap,
-    normalMapRepeat
-) {
+async function newPhysicalMaterial(parameters) {
+    /*
+    parameters = {
+        albedo,
+        albedoMap,
+        diffuseRoughness,
+        lightDirection,
+        lightIntensity,
+        ambientIntensity,
+        specularRoughness,
+        specularColor,
+        normalMap,
+        normalMapRepeat,
+    }
+    */
+
     var vertexShader = await downloadText("/shaders/basic.vert");
     var fragmentShader = await downloadText("/shaders/physical.frag");
 
     const uniforms = {
-        uAlbedo: { value: albedo },
-        uDiffuseRoughness: { value: diffuseRoughness },
-        uLightDirection: { value: lightDirection },
-        uLightIntensity: { value: lightIntensity },
-        uAmbientIntensity: { value: ambientIntensity },
-        uSpecularRoughness: { value: specularRoughness },
-        uSpecularColor: { value: specularColor },
+        uAlbedo: { value: parameters.albedo },
+        uDiffuseRoughness: { value: parameters.diffuseRoughness },
+        uLightDirection: { value: parameters.lightDirection },
+        uLightIntensity: { value: parameters.lightIntensity },
+        uAmbientIntensity: { value: parameters.ambientIntensity },
+        uSpecularRoughness: { value: parameters.specularRoughness },
+        uSpecularColor: { value: parameters.specularColor },
     };
 
-    if (albedoMap) {
-        uniforms.uAlbedoMap = { value: albedoMap };
+    if (parameters.albedoMap) {
+        uniforms.uAlbedoMap = { value: parameters.albedoMap };
         vertexShader = "#define ALBEDO_MAP_ENABLED 1\n" + vertexShader
         fragmentShader = "#define ALBEDO_MAP_ENABLED 1\n" + fragmentShader
     }
 
-    if (normalMap) {
-        uniforms.uNormalMap = { value: normalMap };
-        uniforms.uNormalMapRepeat = { value: normalMapRepeat };
+    if (parameters.normalMap) {
+        uniforms.uNormalMap = { value: parameters.normalMap };
+        uniforms.uNormalMapRepeat = { value: parameters.normalMapRepeat };
         vertexShader = "#define NORMAL_MAP_ENABLED 1\n" + vertexShader
         fragmentShader = "#define NORMAL_MAP_ENABLED 1\n" + fragmentShader
     }
@@ -193,18 +197,62 @@ async function main() {
             0.2, // reflectance
         );
     } else if (shaderType == 2) {
-        mesh.material = await newPhysicalMaterial(
-            new THREE.Vector3(1.0, 1.0, 1.0), // albedo
-            albedoMap,
-            0.3, // diffuseRoughness
-            new THREE.Vector3(-0.2, 1.0, 0.5), // lightDirection
-            new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0), // lightIntensity
-            new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.3), // ambientIntensity
-            0.5, // specularRoughness
-            new THREE.Vector3(0.2, 0.2, 0.2), // specularColor
-            normalMap,
-            10, // normalMapRepeat
-        );
+        const light = {
+            lightDirection: new THREE.Vector3(-0.2, 1.0, 0.5),
+            lightIntensity: new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(3.0),
+            ambientIntensity: new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.4),
+        };
+        const smoothGold = {
+            albedo: new THREE.Vector3(0.0, 0.0, 0.0),
+            albedoMap: null,
+            diffuseRoughness: 0.0,
+            specularRoughness: 0.2,
+            specularColor: new THREE.Vector3(1.022, 0.782, 0.344),
+            normalMap: null,
+            normalMapRepeat: 10,
+        };
+        const roughGold = {
+            albedo: new THREE.Vector3(0.0, 0.0, 0.0),
+            albedoMap: null,
+            diffuseRoughness: 0.0,
+            specularRoughness: 0.7,
+            specularColor: new THREE.Vector3(1.022, 0.782, 0.344),
+            normalMap: null,
+            normalMapRepeat: 10,
+        };
+        const bumpyIron = {
+            albedo: new THREE.Vector3(0.0, 0.0, 0.0),
+            albedoMap: null,
+            diffuseRoughness: 0.0,
+            specularRoughness: 0.5,
+            specularColor: new THREE.Vector3(0.562, 0.565, 0.578),
+            normalMap: normalMap,
+            normalMapRepeat: 10,
+        };
+        const plastic = {
+            albedo: new THREE.Vector3(1.0, 1.0, 1.0),
+            albedoMap: albedoMap,
+            diffuseRoughness: 0.1,
+            specularRoughness: 0.2,
+            specularColor: new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.045),
+            normalMap: null,
+            normalMapRepeat: 10,
+        };
+        const roughPlastic = {
+            albedo: new THREE.Vector3(1.0, 1.0, 1.0),
+            albedoMap: albedoMap,
+            diffuseRoughness: 0.9,
+            specularRoughness: 0.9,
+            specularColor: new THREE.Vector3(1.0, 1.0, 1.0).multiplyScalar(0.045),
+            normalMap: null,
+            normalMapRepeat: 10,
+        };
+
+        const parameters = {
+            ...roughPlastic,
+            ...light,
+        };
+        mesh.material = await newPhysicalMaterial(parameters);
     }
 
     scene.add(mesh);
@@ -212,12 +260,15 @@ async function main() {
     camera.position.z = 400;
     camera.position.x = 0;
 
+    mesh.rotation.x += 0.5;
+    mesh.rotation.z += 0.1;
+
     function animate() {
         requestAnimationFrame(animate);
         renderer.render(scene, camera);
 
-        mesh.rotation.x += 0.01;
-        mesh.rotation.y -= 0.01;
+        //mesh.rotation.x += 0.01;
+        //mesh.rotation.y -= 0.01;
     }
     animate();
 }
