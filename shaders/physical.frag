@@ -125,9 +125,11 @@ vec3 SpecularBRDF(
     vec3 specularColor
 ) {
     vec3 halfVector = normalize(lightDirection + viewDirection);
-    return GGX(halfVector, normal, roughness)
-         * MaskingAndShadowing(normal, lightDirection, viewDirection, roughness)
-         * Fresnel(halfVector, lightDirection, specularColor);
+    vec3 ret = vec3(1.0, 1.0, 1.0);
+    ret *= GGX(halfVector, normal, roughness);
+    ret *= MaskingAndShadowing(normal, lightDirection, viewDirection, roughness);
+    ret *= Fresnel(halfVector, lightDirection, specularColor);
+    return ret;
 }
 
 // r を n の周りに theta だけ回転させたベクトルを返す
