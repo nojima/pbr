@@ -118,20 +118,27 @@ async function newPhysicalMaterial(
     specularRoughness,
     specularColor
 ) {
-    const vertexShader = await downloadText("/shaders/basic.vert");
-    const fragmentShader = await downloadText("/shaders/physical.frag");
+    var vertexShader = await downloadText("/shaders/basic.vert");
+    var fragmentShader = await downloadText("/shaders/physical.frag");
+
+    const uniforms = {
+        uAlbedo: { value: albedo },
+        uDiffuseRoughness: { value: diffuseRoughness },
+        uLightDirection: { value: lightDirection },
+        uLightIntensity: { value: lightIntensity },
+        uAmbientIntensity: { value: ambientIntensity },
+        uSpecularRoughness: { value: specularRoughness },
+        uSpecularColor: { value: specularColor },
+    };
+
+    if (albedoMap) {
+        uniforms.uAlbedoMap = { value: albedoMap };
+        vertexShader = "#define ALBEDO_MAP_ENABLED 1\n" + vertexShader
+        fragmentShader = "#define ALBEDO_MAP_ENABLED 1\n" + fragmentShader
+    }
 
     return new THREE.ShaderMaterial({
-        uniforms: {
-            uAlbedo: { value: albedo },
-            uAlbedoMap: { value: albedoMap },
-            uDiffuseRoughness: { value: diffuseRoughness },
-            uLightDirection: { value: lightDirection },
-            uLightIntensity: { value: lightIntensity },
-            uAmbientIntensity: { value: ambientIntensity },
-            uSpecularRoughness: { value: specularRoughness },
-            uSpecularColor: { value: specularColor },
-        },
+        uniforms: uniforms,
         vertexShader: vertexShader,
         fragmentShader: fragmentShader,
     });

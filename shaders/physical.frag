@@ -8,7 +8,9 @@ const float PI = acos(-1.0);
 const int DIFFUSE_BRDF = 2;
 
 uniform vec3 uAlbedo;
-uniform sampler2D uAlbedoMap;
+#ifdef ALBEDO_MAP_ENABLED
+    uniform sampler2D uAlbedoMap;
+#endif
 uniform float uDiffuseRoughness;
 uniform vec3 uLightDirection;
 uniform vec3 uLightIntensity;
@@ -69,7 +71,11 @@ vec3 DiffuseBRDF(
     vec2 uv,
     float roughness
 ) {
-    vec3 albedo_ = albedo * texture2D(uAlbedoMap, uv).rgb;
+    #ifdef ALBEDO_MAP_ENABLED
+        vec3 albedo_ = albedo * texture2D(uAlbedoMap, uv).rgb;
+    #else
+        vec3 albedo_ = albedo;
+    #endif
 
     if (DIFFUSE_BRDF == 0) {
         return LambertDiffuseBRDF(albedo_);
