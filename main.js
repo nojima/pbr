@@ -274,8 +274,7 @@ async function main() {
     function render() {
         renderer.render(scene, camera);
 
-        //mesh.rotation.x += 0.01;
-        //mesh.rotation.y -= 0.01;
+        mesh.rotation.y -= 0.01;
     }
     renderer.setAnimationLoop(render);
 }
