@@ -104,16 +104,16 @@ float GGX(vec3 halfVector, vec3 normal, float roughness) {
 // Smith Joint Masking and Shadowing Function
 float MaskingAndShadowing(vec3 normal, vec3 lightDirection, vec3 viewDirection, float roughness) {
     float alpha2 = pow(roughness, 4.0);
-    float NL = dot(normal, lightDirection);
-    float NV = dot(normal, viewDirection);
+    float NL = max(dot(normal, lightDirection), 0.0);
+    float NV = max(dot(normal, viewDirection), 0.0);
     float lambdaL = NV * sqrt(NL * NL * (1.0 - alpha2) + alpha2);
     float lambdaV = NL * sqrt(NV * NV * (1.0 - alpha2) + alpha2);
-    return 0.5 / (lambdaL + lambdaV);
+    return 0.5 / (lambdaL + lambdaV + 1e-6);
 }
 
 // Schlick の Fresnel の近似式
 vec3 Fresnel(vec3 normal, vec3 lightDirection, vec3 specularColor) {
-    float NL = dot(lightDirection, normal);
+    float NL = max(dot(lightDirection, normal), 0.0);
     return specularColor + (1.0 - specularColor) * pow(1.0 - NL, 5.0);
 }
 
@@ -139,10 +139,13 @@ vec3 TangentNormalToWorldNormal(vec3 tangentNormal, vec3 normal, vec3 position, 
     vec2 uv1 = dFdx(uv);
     vec2 uv2 = dFdy(uv);
 
-    vec3 X = cross(p2, normal);
-    vec3 Y = cross(p1, normal);
-    vec3 tangent  = normalize(uv2.x * Y - uv1.x * X);
-    vec3 binormal = normalize(uv2.y * Y - uv1.y * X);
+    // world空間におけるu軸とv軸の方向を求める
+    vec3 u = normalize(uv2.y * p1 - uv1.y * p2);
+    vec3 v = normalize(uv1.x * p2 - uv2.x * p1);
+
+    // uとvをnormalを法線とする平面に射影して tangent vector と binormal vector を得る
+    vec3 tangent  = normalize(u - dot(u, normal) * normal);
+    vec3 binormal = normalize(v - dot(v, normal) * normal);
 
     return normalize(tangentNormal.x * tangent + tangentNormal.y * binormal + tangentNormal.z * normal);
 }
