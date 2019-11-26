@@ -1,4 +1,5 @@
 // 物理ベースシェーダ(WIP)
+#extension GL_OES_standard_derivatives : enable
 
 const float PI = acos(-1.0);
 
@@ -132,18 +133,23 @@ vec3 SpecularBRDF(
     return ret;
 }
 
-// r を n の周りに theta だけ回転させたベクトルを返す
-vec3 RotateVector(vec3 r, vec3 n, float theta) {
-    // ロドリゲスの回転公式
-    return r * cos(theta) + n * dot(r, n) * (1.0 - cos(theta)) + cross(n, r) * sin(theta);
-}
-
 vec3 CalculateNormal() {
     #ifdef NORMAL_MAP_ENABLED
-        vec3 m = 2.0 * texture2D(uNormalMap, fract(vUV * uNormalMapRepeat)).rgb - 1.0;
-        vec3 axis = normalize(vec3(m.y, -m.x, 0));
-        float angle = acos(m.z);
-        return normalize(RotateVector(vNormal, axis, angle));
+        vec2 uv = fract(vUV * uNormalMapRepeat);
+        vec3 N = vNormal;
+        vec3 tangentNormal = 2.0 * texture2D(uNormalMap, uv).rgb - 1.0;
+
+        vec3 p1 = dFdx(vPosition);
+        vec3 p2 = dFdy(vPosition);
+        vec2 uv1 = dFdx(uv);
+        vec2 uv2 = dFdy(uv);
+
+        vec3 X = cross(p2, N);
+        vec3 Y = cross(p1, N);
+        vec3 T = uv2.x * Y - uv1.x * X;
+        vec3 B = uv2.y * Y - uv1.y * X;
+
+        return tangentNormal.x * T + tangentNormal.y * B + tangentNormal.z * N;
     #else
         return normalize(vNormal);
     #endif

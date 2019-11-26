@@ -177,7 +177,7 @@ async function main() {
     albedoMap.encoding = THREE.sRGBEncoding;
     albedoMap.flipY = false;
 
-    const normalMap = await downloadTexture("/vendor/sample_normal_map.jpg")
+    const normalMap = await downloadTexture("/vendor/sample_normal_map.png")
     normalMap.encoding = THREE.sRGBEncoding;
     normalMap.flipY = false;
 
