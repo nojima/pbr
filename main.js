@@ -179,6 +179,7 @@ async function main() {
 
     const normalMap = await downloadTexture("/vendor/sample_normal_map.png")
     normalMap.encoding = THREE.sRGBEncoding;
+    normalMap.wrapS = normalMap.wrapT = THREE.RepeatWrapping;
     normalMap.flipY = false;
 
     const mesh = await loadDuck()
@@ -274,7 +275,7 @@ async function main() {
     function render() {
         renderer.render(scene, camera);
 
-        mesh.rotation.y -= 0.01;
+        mesh.rotation.y -= 0.002;
     }
     renderer.setAnimationLoop(render);
 }

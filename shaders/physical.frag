@@ -133,23 +133,25 @@ vec3 SpecularBRDF(
     return ret;
 }
 
+vec3 TangentNormalToWorldNormal(vec3 tangentNormal, vec3 normal, vec3 position, vec2 uv) {
+    vec3 p1 = dFdx(position);
+    vec3 p2 = dFdy(position);
+    vec2 uv1 = dFdx(uv);
+    vec2 uv2 = dFdy(uv);
+
+    vec3 X = cross(p2, normal);
+    vec3 Y = cross(p1, normal);
+    vec3 tangent  = normalize(uv2.x * Y - uv1.x * X);
+    vec3 binormal = normalize(uv2.y * Y - uv1.y * X);
+
+    return normalize(tangentNormal.x * tangent + tangentNormal.y * binormal + tangentNormal.z * normal);
+}
+
 vec3 CalculateNormal() {
     #ifdef NORMAL_MAP_ENABLED
-        vec2 uv = fract(vUV * uNormalMapRepeat);
-        vec3 N = vNormal;
+        vec2 uv = vUV * uNormalMapRepeat;
         vec3 tangentNormal = 2.0 * texture2D(uNormalMap, uv).rgb - 1.0;
-
-        vec3 p1 = dFdx(vPosition);
-        vec3 p2 = dFdy(vPosition);
-        vec2 uv1 = dFdx(uv);
-        vec2 uv2 = dFdy(uv);
-
-        vec3 X = cross(p2, N);
-        vec3 Y = cross(p1, N);
-        vec3 T = uv2.x * Y - uv1.x * X;
-        vec3 B = uv2.y * Y - uv1.y * X;
-
-        return tangentNormal.x * T + tangentNormal.y * B + tangentNormal.z * N;
+        return TangentNormalToWorldNormal(tangentNormal, normalize(vNormal), vPosition, uv);
     #else
         return normalize(vNormal);
     #endif
